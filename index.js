@@ -7,32 +7,27 @@ const pump = require('pump-promise')
 const getPixels = pify(require('get-pixels'))
 const savePixels = require('save-pixels')
 
-const supportedFormats = new Set(['jpg', 'png', 'gif'])
+const GIFEncoder = require('gifencoder')
+const pngFileStream = require('png-file-stream')
+
 
 class Gif {
   constructor(options) {
-    const { input, output, coalesce = true } = options
-
-    this.input = input
-    this.output = output
-    this.coalesce = coalesce
-    this.format = output ? path.extname(output).substr(1) : undefined
-
-    if (format && !supportedFormats.has(format)) {
-      throw new Error(`invalid output format "${format}"`)
-    }
-
+    this.options = options
   }
 
   /**
-   * Gif decoding (extracting gif frames)
+   * Gif decoding (extracting the frame image of gif)
+   * @param {String} input     Path to a GIF file
+   * @param {String} output    Optional frame pattern if you want to write each frame to disk. Should contain a %d that will be replaced with the frame number (starting at 0).
+   * @param {Boolean} coalesce Whether or not to perform inter-frame coalescing.
    */
   async decode() {
-    const results = await getPixels(this.input)
-    const { shape } = results
-    const format = output
-      ? path.extname(output).substr(1)
-      : undefined
+    const { input, output, coalesce = true } = this.options
+
+    const format = output ? path.extname(output).substr(1) : undefined
+
+    const supportedFormats = new Set(['jpg', 'png', 'gif'])
 
     if (format && !supportedFormats.has(format)) {
       throw new Error(`invalid output format "${format}"`)
@@ -66,12 +61,12 @@ class Gif {
         }
 
         if (output) {
-          await this.saveFrame(results.pick(i), output.replace('%d', i))
+          await this.saveFrame(results.pick(i), format, output.replace('%d', i))
         }
       }
     } else if (output) {
       // non-animated gif with a single frame
-      await this.saveFrame(results, output.replace('%d', 0))
+      await this.saveFrame(results, format, output.replace('%d', 0))
     }
 
     return results
@@ -80,11 +75,41 @@ class Gif {
   /**
    * Save frame
    * @param {Buffer} data
+   * @param {String} format
    * @param {String} filename
    */
-  saveFrame(data, filename) {
-    const stream = savePixels(data, this.format)
+  saveFrame(data, format, filename) {
+    const stream = savePixels(data, format)
     return pump(stream, fs.createWriteStream(filename))
+  }
+
+  /**
+   * Gif encoding
+   * @param {String} input    image path(frame?.png)
+   * @param {String} output   save GIF path
+   * @param {Number} width
+   * @param {Number} height
+   * @param {Number} repeat
+   * @param {Number} delay
+   * @param {Number} quality
+   */
+  async encode() {
+    const { input, output, width = 300, height = 200, repeat = 0, delay = 250, quality = 80 } = this.options
+
+    const format = input ? path.extname(input).substr(1) : undefined
+
+    const encoder = new GIFEncoder(width, height)
+
+    if (format === 'png') {
+      const stream = pngFileStream(input)
+        .pipe(encoder.createWriteStream({ repeat, delay, quality }))
+        .pipe(fs.createWriteStream(output))
+
+      return await new Promise((resolve, reject) => {
+        stream.on('finish', resolve)
+        stream.on('error', reject)
+      })
+    }
   }
 }
 
