@@ -1,0 +1,26 @@
+{
+  "name": "node-gif",
+  "version": "1.0.0",
+  "description": "extracting gif frames and composite gif",
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "get-pixels": "^3.3.2",
+    "pify": "^4.0.1",
+    "pump-promise": "^1.0.0",
+    "save-pixels": "^2.3.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iStanHua/node-gif.git"
+  },
+  "keywords": [
+    "gif"
+  ],
+  "author": "istanhua",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iStanHua/node-gif/issues"
+  },
+  "homepage": "https://github.com/iStanHua/node-gif#readme"
+}

@@ -1,2 +1,3 @@
 # node-gif
-gif
+> extracting gif frames and composite gif
+
