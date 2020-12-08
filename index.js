@@ -4,14 +4,14 @@ const fs = require('fs')
 const path = require('path')
 const pify = require('pify')
 const pump = require('pump-promise')
+
 const getPixels = pify(require('get-pixels'))
 const savePixels = require('save-pixels')
 
 const GIFEncoder = require('gifencoder')
 const pngFileStream = require('png-file-stream')
 
-
-class Gif {
+module.exports = class Gif {
   constructor(options) {
     this.options = options
   }
@@ -112,5 +112,3 @@ class Gif {
     }
   }
 }
-
-module.exports = Gif

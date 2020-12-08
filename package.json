@@ -10,7 +10,8 @@
     "pump-promise": "^1.0.0",
     "save-pixels": "^2.3.4",
     "gifencoder": "^2.0.1",
-    "png-file-stream": "^1.2.1"
+    "png-file-stream": "^1.2.1",
+    "gifsicle": "^5.1.0"
   },
   "repository": {
     "type": "git",
